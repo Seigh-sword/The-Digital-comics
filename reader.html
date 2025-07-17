@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Read Comic - The Digital Comics™</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>📖 Comic Reader</h1>
+  <img id="panel" src="" style="max-width: 100%; display: block; margin: auto;">
+  <button onclick="nextPanel()">➡️ Next</button>
+
+  <script type="module">
+    import { db } from './firebase.js';
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const comicId = localStorage.getItem("comicId");
+    const panelImg = document.getElementById("panel");
+    let panels = [];
+    let index = 0;
+
+    const comicDoc = await getDoc(doc(db, "comics", comicId));
+    if (comicDoc.exists()) {
+      panels = comicDoc.data().panels;
+      panelImg.src = panels[0];
+    }
+
+    window.nextPanel = () => {
+      index++;
+      if (index < panels.length) {
+        panelImg.src = panels[index];
+      } else {
+        alert("THE END 🎬");
+        window.location.href = "index.html";
+      }
+    };
+  </script>
+</body>
+</html>
