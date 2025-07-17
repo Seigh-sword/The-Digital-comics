@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Upload Comic - The Digital Comics™</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>📤 Upload Your Comic</h1>
+  <input type="text" id="title" placeholder="Comic Title"><br>
+  <input type="text" id="author" placeholder="Your Name"><br>
+  <input type="file" id="images" multiple><br>
+  <button onclick="uploadComic()">Upload Comic</button>
+
+  <script type="module">
+    import { db, storage } from './firebase.js';
+    import { collection, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+    async function uploadComic() {
+      const title = document.getElementById("title").value;
+      const author = document.getElementById("author").value;
+      const files = document.getElementById("images").files;
+
+      const comicId = "comic_" + Date.now();
+      const panelUrls = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const imageRef = ref(storage, `${comicId}/panel_${i + 1}.png`);
+        await uploadBytes(imageRef, files[i]);
+        const url = await getDownloadURL(imageRef);
+        panelUrls.push(url);
+      }
+
+      await setDoc(doc(db, "comics", comicId), {
+        title,
+        author,
+        panels: panelUrls,
+        createdAt: serverTimestamp()
+      });
+
+      alert("Comic uploaded! 😎");
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>
